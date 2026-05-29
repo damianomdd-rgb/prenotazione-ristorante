@@ -32,7 +32,7 @@ textarea{resize:none;height:90px;line-height:1.6}
 .divider{height:.5px;background:#e8dfd0;margin:0 0 1.8rem}
 .opt-label{font-size:10px;letter-spacing:.18em;color:#b5a99a;text-transform:uppercase;margin-left:6px}
 .submit-wrap{margin-top:2rem;text-align:center}
-.btn{font-family:'Jost',sans-serif;font-size:11px;letter-spacing:.35em;text-transform:uppercase;font-weight:400;color:#f5f0e8;background:#1a1410;border:none;padding:1rem 3.5rem;cursor:pointer;transition:background .25s,transform .15s;border-radius:1px;position:relative}
+.btn{font-family:'Jost',sans-serif;font-size:11px;letter-spacing:.35em;text-transform:uppercase;font-weight:400;color:#f5f0e8;background:#1a1410;border:none;padding:1rem 3.5rem;cursor:pointer;transition:background .25s,transform .15s;border-radius:1px}
 .btn:hover{background:#3a2e22}
 .btn:active{transform:scale(.98)}
 .btn:disabled{background:#8a7560;cursor:not-allowed}
@@ -111,7 +111,7 @@ textarea{resize:none;height:90px;line-height:1.6}
   </div>
 
   <div class="footer-note">
-    <strong>Orari</strong> — Pranzo: lun–ven 12:00–15:00 · Cena: mar–sab 19:30–22:00<br>
+    <strong>Orari</strong> — Pranzo: lun–ven 12:00–14:30 · Cena: mar–sab 19:30–22:00<br>
     <strong>Chiusura</strong>: sabato a pranzo · domenica sera · lunedì intero
   </div>
 </div>
@@ -120,11 +120,9 @@ textarea{resize:none;height:90px;line-height:1.6}
 emailjs.init('xGkS8WXadQUVmKMQY');
 
 const PRANZO=['12:00','12:30','13:00','13:30','14:00','14:30'];
-const CENA=['19:30','20:00','20:30','21:00','21:30'];
+const CENA=['19:30','20:00','20:30','21:00','21:30','22:00'];
 
 function dow(s){const[y,m,d]=s.split('-').map(Number);return new Date(y,m-1,d).getDay();}
-
-function dowLabel(d){return['domenica','lunedì','martedì','mercoledì','giovedì','venerdì','sabato'][d];}
 
 function updateSlots(){
   const sel=document.getElementById('orario');
@@ -138,7 +136,7 @@ function updateSlots(){
   const pr=d!==6?PRANZO:[];
   const ce=d!==0?CENA:[];
   if(!pr.length&&!ce.length){errEl.textContent='Nessun orario disponibile';errEl.style.display='block';return;}
-  if(pr.length){const g=document.createElement('optgroup');g.label='Pranzo (12:00–15:00)';pr.forEach(s=>{const o=document.createElement('option');o.value=s;o.textContent=s;g.appendChild(o);});sel.appendChild(g);}
+  if(pr.length){const g=document.createElement('optgroup');g.label='Pranzo (12:00–14:30)';pr.forEach(s=>{const o=document.createElement('option');o.value=s;o.textContent=s;g.appendChild(o);});sel.appendChild(g);}
   if(ce.length){const g=document.createElement('optgroup');g.label='Cena (19:30–22:00)';ce.forEach(s=>{const o=document.createElement('option');o.value=s;o.textContent=s;g.appendChild(o);});sel.appendChild(g);}
 }
 
@@ -146,7 +144,7 @@ document.getElementById('data').addEventListener('change',updateSlots);
 const t=new Date();
 document.getElementById('data').min=t.getFullYear()+'-'+String(t.getMonth()+1).padStart(2,'0')+'-'+String(t.getDate()).padStart(2,'0');
 
-function showToast(msg, ok){
+function showToast(msg,ok){
   const el=document.getElementById('toast');
   el.textContent=msg;
   el.style.display='block';
@@ -176,18 +174,11 @@ async function invia(){
   btn.disabled=true;
   btn.textContent='Invio in corso…';
 
-  const params={
-    nome,cognome,telefono,email,
-    data:df,orario,persone,
-    note:note||'—'
-  };
+  const params={nome,cognome,telefono,email,data:df,orario,persone,note:note||'—'};
 
   try{
-    // Notifica al ristorante
     await emailjs.send('service_nlzvv0g','template_vw1zlvl',params);
-    // Auto-reply al cliente
     await emailjs.send('service_nlzvv0g','template_qgvihy9',params);
-
     document.getElementById('formSection').style.display='none';
     document.getElementById('successMsg').innerHTML=
       'Grazie, <strong>'+nome+'</strong>! La tua prenotazione è stata inviata.<br>'+
